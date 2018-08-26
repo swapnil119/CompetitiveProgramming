@@ -36,34 +36,34 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=105,M=1005;
-int val[N],n,m;
-bool vis[N][N*M];
-db dp[N][N*M];
-db fun(int ind,int sum)
+/* answer is sum of floor(n/i), there are O(sqrt(n)) distinct values of n/i. First iterate till i=1 to sqrt(n). Then iterate over value of n/i from 1 to sqrt(n) */
+ll calc(ll l,ll r)
 {
-  if(sum<=0) return 0.0;
-  if(ind==n+1) return 1.0;
-  if(vis[ind][sum]) return dp[ind][sum];
-  vis[ind][sum]=true;
-  db ans=0.0;
-  rep(i,1,m+1)
-    {
-      if(val[ind]!=i)
-	ans+=(1.0/(db)(m-1))*fun(ind+1,sum-i);
-    }
-  trace(ind,sum,ans);
-  return dp[ind][sum]=ans;
+  return (r*(r+1)-l*(l-1))/2;
 }
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  int sum=0;
-  cin>>n>>m;
-  rep(i,1,n+1) cin>>val[i],sum+=val[i];
-  db ans=fun(1,sum);
-  ans*=(db)(n-1);
-  cout<<setprecision(10)<<fixed<<ans+1.0<<endl;
+  int n;
+  while(cin>>n)
+    {
+      if(!n) break;
+      int sq=sqrt(n);
+      ll ans=0;
+      rep(i,1,sq+1)
+	{
+	  ans+=(ll)(n/i)*i;
+	  if(i==1) ans--;
+	}
+      rep(i,1,sq+1)
+	{
+	  ll l=1+n/(i+1),r=n/i;
+	  l=max(l,(ll)sq+1);
+	  if(l>r) continue;
+	  ans+=calc(l,r)*i;
+	}
+      cout<<ans<<endl;
+    }
   return 0 ;
 }
