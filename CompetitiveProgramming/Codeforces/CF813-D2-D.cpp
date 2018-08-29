@@ -37,7 +37,7 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #define trace(...)
 #endif
 const int N=5005;
-int dp[N][N],mx[7],mx[100005];
+int dp[N][N],mxmod[7],mx[100005],a[N];
 int main()
 {
   std::ios::sync_with_stdio(false);
@@ -45,12 +45,26 @@ int main()
   int n;
   cin>>n;
   rep(i,1,n+1) cin>>a[i];
-  rep(i,1,n+1)
+  rep(i,0,n+1) rep(j,0,n+1) dp[i][j]=-N;
+  dp[0][0]=0;
+  int ans=0;
+  rep(j,0,n)
     {
-      rep(j,1,i)
+      rep(i,1,n+1)
 	{
-	  
+	  int i1=i,j1=j;
+	  if(i<j) swap(i,j);
+	  dp[i][j]=mxmod[a[i]%7]+1;//next to same mod 7
+	  dp[i][j]=max(dp[i][j],mx[a[i1]+1]+1);//next to a[i]+1
+	  dp[i][j]=max(dp[i][j],mx[a[i1]-1]+1);//next to a[i]-1
+	  dp[i][j]=max(dp[i][j],dp[0][j]+1);//start a melody
+	  mxmod[a[i1]%7]=max(mxmod[a[i1]%7],dp[i][j]);
+	  mx[a[i1]]=max(mx[a[i1]],dp[i][j]);
+	  ans=max(ans,dp[i][j]);
+	  trace(i,j,dp[i][j]);
+	  i=i1,j=j1;
 	}
     }
+  cout<<ans<<endl;
   return 0 ;
 }

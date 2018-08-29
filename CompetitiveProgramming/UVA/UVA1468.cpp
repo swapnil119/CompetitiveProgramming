@@ -36,21 +36,29 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=5005;
-int dp[N][N],mx[7],mx[100005];
+/*Answer should always with x between A and B. for each x calculate the range of y where our restaurant can lie. Now update it from xs before it and xs after. For each adjacent x range gets affected by 1.*/
+const int N=60005;
+int x[N],y[N],d[N];
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  int n;
-  cin>>n;
-  rep(i,1,n+1) cin>>a[i];
-  rep(i,1,n+1)
+  int t,n,m;
+  cin>>t;
+  while(t--)
     {
-      rep(j,1,i)
-	{
-	  
-	}
+      cin>>m>>n;
+      rep(i,1,n+1)
+	cin>>x[i]>>y[i];
+      rep(i,0,m) d[i]=m;
+      rep(i,1,n+1) d[x[i]]=min(d[x[i]],abs(y[i]-y[1]));
+      if(x[1]>x[2]) swap(x[1],x[2]);
+      rep(i,x[1]+1,x[2]) d[i]=min(d[i],d[i-1]+1);
+      repv(i,x[1]+1,x[2]) d[i]=min(d[i],d[i+1]+1);
+      ll ans=0;
+      rep(i,x[1],x[2]+1)
+	ans+=max(0,min(d[i]-1,y[1]))+max(0,min(m-y[1],d[i]));
+      cout<<ans<<endl;
     }
   return 0 ;
 }
