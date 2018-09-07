@@ -36,83 +36,87 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=1000005;
-int v[N],c[N],p[N],bit[N*10],bit2[N*10],val[N];
-void update1(int i,int val)
+/*Using mobius function. Inclusion exclusion */
+const int N=1000005,L=61;
+int sp[N],pre[N],mu[L];
+bool calc(ll x,int k,ll n)
 {
-  trace(i);
-  while(i)
+  ll ans=1;
+  while(k)
     {
-      bit[i]=min(bit[i],val);
-      i-=(i&(-i));
+      if(k&1)
+	{
+	  if(ans>n/x) return false;
+	  ans*=x;
+	}
+      k>>=1;
+      if(x>n/x && k) return false;
+      x*=x;
     }
+  return true;
 }
-int query1(int i)
+int arr[L];
+ll findk(ll n,int k)
 {
-  int ans=N*10;
-  while(i<N*10)
+  ll low=1,high=arr[k];
+  if(high>n) high=n;
+  while(low<high)
     {
-      ans=min(ans,bit[i]);
-      i+=(i&(-i));
+      ll mid=(low+high+1)>>1;
+      if(calc(mid,k,n)) //less than n
+	low=mid;
+      else
+	high=mid-1;
     }
-  return ans;
+  return low;
 }
-void update2(int i,int val)
+ll findk2(int k)
 {
-  while(i<N*10)
+  ll n=(ll)1e18;
+  ll low=1,high=n;
+  while(low<high)
     {
-      bit2[i]=min(bit2[i],val);
-      i+=(i&(-i));
+      ll mid=(low+high+1)>>1;
+      if(calc(mid,k,n)) //less than n
+	low=mid;
+      else
+	high=mid-1;
     }
+  return low;
 }
-int query2(int i)
+void MF()
 {
-  int ans=N*10;
-  while(i)
-    {
-      ans=min(ans,bit2[i]);
-      i-=(i&(-i));
-    }
-  return ans;
+  ll temp ;
+  mu[1]=2;
+  rep(i,2,L)
+    if(!mu[i])
+      {
+	mu[i] = 1 ; temp = (ll)i*(ll)i ;
+	if(temp<=N)
+	  for(int j=temp ;j<L;j+=temp) mu[j]=-1 ;
+	for(int j = i<<1;j<L;j+=i) if(mu[j]!=-1) ++mu[j] ;
+      }
+  FEN(i,L-1)  mu[i]=(mu[i]==-1)?0:(mu[i]&1)?-1:1;
 }
 int main()
 {
   std::ios::sync_with_stdio(false);
-  cin.tie(NULL) ; cout.tie(NULL) ;
-  int n,k;
-  cin>>n>>k;
-  rep(i,0,N*10) bit[i]=bit2[i]=N;
-  rep(i,1,n+1) cin>>v[i];
-  rep(i,1,n+1) cin>>c[i];
-  vi v;
-  repv(i,1,n+1)//calculate optimal answer for t
+  cin.tie(NULL) ; cout.tie(NULL);
+  rep(i,2,L) arr[i]=findk2(i);
+  MF();
+  int t;
+  cin>>t;
+  while(t--)
     {
-      update1(min((int)1e7,100*v[i]),i);
-      trace(i);
-      update2(c[i],i);
-      trace(i);
-      int low=1,high=1e7;
-      while(low<high)
+      ll n;
+      cin>>n;
+      ll ans=n-1;
+      rep(i,2,61)
 	{
-	  int mid=(low+high+1)>>1;
-	  int l1=query1(min((int)1e7,100*v[i]));//first index which has value greater equal to this
-	  int l2=query2(c[i]-1);//first index which has value less than this
-	  l2=min(l2,n); l1=min(l1,n);
-	  if(l1>=l2) high=mid-1;
-	  else low=mid;
+	  ll tmp=findk(n,i);
+	  ans+=(ll)mu[i]*(tmp-1);
 	}
-      val[i]=high;
-      trace(i,val[i]);
-      v.pb(val[i]);
+      cout<<ans<<endl;
     }
-  sort(all(v));
-  db ans=0.0,curr=(db)k/(db)n,num=n-k+1,den=n;
-  rep(i,1,n-k+2)
-    {
-      ans+=(db)v[i-1]*curr;
-      num--; den--;
-      curr*=(num/den);
-    }
-  cout<<setprecision(10)<<fixed<<ans<<endl;
   return 0 ;
 }
