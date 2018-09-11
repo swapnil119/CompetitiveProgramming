@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include "combo.h"
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
@@ -55,39 +54,38 @@ string guess_sequence(int N)
       if(x==0) ans+='Y';
       else ans+='X';
     }
-  if(N==1) return ans;
   rep(i,2,N)
     {
       if(ans[0]=='A')
 	{
 	  query=ans+"B"+ans+"XB"+ans+"XX"+ans+"XY";
 	  x=press(query);
-	  if(x==sz(ans)) ans+="Y";
-	  else if(x==sz(ans)+1) ans+="B";
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="B";
 	  else ans+="X";
 	}
       else if(ans[0]=='B')
 	{
 	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XY";
 	  x=press(query);
-	  if(x==sz(ans)) ans+="Y";
-	  else if(x==sz(ans)+1) ans+="A";
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="A";
 	  else ans+="X";
 	}
       else if(ans[0]=='X')
 	{
 	  query=ans+"A"+ans+"BA"+ans+"BB"+ans+"BY";
 	  x=press(query);
-	  if(x==sz(ans)) ans+="Y";
-	  else if(x==sz(ans)+1) ans+="A";
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="A";
 	  else ans+="B";
 	}
       else
 	{
 	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XB";
 	  x=press(query);
-	  if(x==sz(ans)) ans+="B";
-	  else if(x==sz(ans)+1) ans+="A";
+	  if(x==0) ans+="B";
+	  else if(x==1) ans+="A";
 	  else ans+="X";
 	}
     }

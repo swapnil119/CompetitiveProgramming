@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "combo.h"
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
@@ -36,10 +37,82 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-int main()
+string guess_sequence(int N)
 {
-  std::ios::sync_with_stdio(false);
-  cin.tie(NULL) ; cout.tie(NULL) ;
-  
-  return 0 ;
+  string ans="";
+  string query="";
+  query="AB";
+  int x=press(query);
+  if(x)
+    {
+      x=press("A");
+      if(x==0) ans+='B';
+      else ans+='A';
+    }
+  else
+    {
+      x=press("X");
+      if(x==0) ans+='Y';
+      else ans+='X';
+    }
+  rep(i,2,N)
+    {
+      if(ans[0]=='A')
+	{
+	  query=ans+"B"+ans+"XB"+ans+"XX"+ans+"XY";
+	  x=press(query);
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="B";
+	  else ans+="X";
+	}
+      else if(ans[0]=='B')
+	{
+	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XY";
+	  x=press(query);
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="A";
+	  else ans+="X";
+	}
+      else if(ans[0]=='X')
+	{
+	  query=ans+"A"+ans+"BA"+ans+"BB"+ans+"BY";
+	  x=press(query);
+	  if(x==0) ans+="Y";
+	  else if(x==1) ans+="A";
+	  else ans+="B";
+	}
+      else
+	{
+	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XB";
+	  x=press(query);
+	  if(x==0) ans+="B";
+	  else if(x==1) ans+="A";
+	  else ans+="X";
+	}
+    }
+  if(ans[0]!='A')
+    {
+      query=ans+"A";
+      x=press(query);
+      if(x==N) return query;
+    }
+  if(ans[0]!='B')
+    {
+      query=ans+"B";
+      x=press(query);
+      if(x==N) return query;
+    }
+  if(ans[0]!='X')
+    {
+      if(ans[0]=='Y')
+	{
+	  ans+="X";
+	  return ans;
+	}
+      query=ans+"X";
+      x=press(query);
+      if(x==N) return query; 
+    }
+  ans+="Y";
+  return ans;
 }
