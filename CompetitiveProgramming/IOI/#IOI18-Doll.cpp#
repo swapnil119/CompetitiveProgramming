@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include "combo.h"
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
@@ -37,82 +36,44 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-string guess_sequence(int N)
+const int N=200005;
+vi v[N];
+int cnt=0;
+int getind(vi &curr)
 {
-  string ans="";
-  string query="";
-  query="AB";
-  int x=press(query);
-  if(x)
+  assert(!curr.empty());
+  int mx=*max_element(all(curr));
+  int mn=*min_element(all(curr));
+  if(mx==mn) return mx;
+  vi tmp1,tmp2;
+  rep(i,0,sz(curr))
     {
-      x=press("A");
-      if(x==0) ans+='B';
-      else ans+='A';
+      if(i%2==0) tmp1.pb(curr[i]);
+      else tmp2.pb(curr[i]);
     }
-  else
-    {
-      x=press("X");
-      if(x==0) ans+='Y';
-      else ans+='X';
-    }
-  rep(i,2,N)
-    {
-      if(ans[0]=='A')
-	{
-	  query=ans+"B"+ans+"XB"+ans+"XX"+ans+"XY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="B";
-	  else ans+="X";
-	}
-      else if(ans[0]=='B')
-	{
-	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="A";
-	  else ans+="X";
-	}
-      else if(ans[0]=='X')
-	{
-	  query=ans+"A"+ans+"BA"+ans+"BB"+ans+"BY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="A";
-	  else ans+="B";
-	}
-      else
-	{
-	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XB";
-	  x=press(query);
-	  if(x==0) ans+="B";
-	  else if(x==1) ans+="A";
-	  else ans+="X";
-	}
-    }
-  if(ans[0]!='A')
-    {
-      query=ans+"A";
-      x=press(query);
-      if(x==N) return query;
-    }
-  if(ans[0]!='B')
-    {
-      query=ans+"B";
-      x=press(query);
-      if(x==N) return query;
-    }
-  if(ans[0]!='X')
-    {
-      if(ans[0]=='Y')
-	{
-	  ans+="X";
-	  return ans;
-	}
-      query=ans+"X";
-      x=press(query);
-      if(x==N) return query; 
-    }
-  ans+="Y";
+  //make a switch
+  int ans=++cnt;
+  X[cnt]=getind(tmp1);
+  Y[cnt]=getind(tmp2);
   return ans;
+}
+void create_circuit(int m,vi A)
+{
+  int n=sz(A);
+  vi C(m+1);
+  vi X(n),Y(n);
+  rep(i,0,n-1)
+    v[A[i]].pb(A[i+1]);
+  v[A[n-1]].pb(0);
+  C[0]=A[0];
+  rep(i,1,m+1)
+    {
+      if(v[i].empty())
+	{
+	  C[i]=0;
+	  continue;
+	}
+      C[i]=getind(v[i]);
+    }
+  answer(C,X,Y);
 }

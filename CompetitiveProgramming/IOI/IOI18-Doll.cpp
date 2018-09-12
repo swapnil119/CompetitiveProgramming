@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "doll.h"
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace std;
@@ -36,82 +37,44 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-string guess_sequence(int N)
+const int N=200005;
+vi X,Y;
+int cnt=0,p=1,n;
+bool state[N*10];
+int build(int low,int high)
 {
-  string ans="";
-  string query="";
-  query="AB";
-  int x=press(query);
-  if(x)
+  if(low>=high) return 0;
+  if(high<p-n) return -1;
+  int mid=(low+high)>>1;
+  int ind=++cnt;
+  X.pb(0); Y.pb(0);
+  int x=build(low,mid),y=build(mid+1,high);
+  X[ind-1]=x;
+  Y[ind-1]=y;
+  return -ind;
+}
+void solve(int ind,int nxt)
+{
+  int &curr=((state[-ind])?Y[-ind-1]:X[-ind-1]);
+  state[-ind]=!state[-ind];
+  if(curr==0) curr=nxt;
+  else solve(curr,nxt);
+}
+void create_circuit(int m,vi A)
+{
+  n=sz(A);
+  if(n==1)
     {
-      x=press("A");
-      if(x==0) ans+='B';
-      else ans+='A';
+      vi C(m+1,0);
+      C[0]=A[0];
+      return answer(C,X,Y);
     }
-  else
-    {
-      x=press("X");
-      if(x==0) ans+='Y';
-      else ans+='X';
-    }
-  rep(i,2,N)
-    {
-      if(ans[0]=='A')
-	{
-	  query=ans+"B"+ans+"XB"+ans+"XX"+ans+"XY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="B";
-	  else ans+="X";
-	}
-      else if(ans[0]=='B')
-	{
-	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="A";
-	  else ans+="X";
-	}
-      else if(ans[0]=='X')
-	{
-	  query=ans+"A"+ans+"BA"+ans+"BB"+ans+"BY";
-	  x=press(query);
-	  if(x==0) ans+="Y";
-	  else if(x==1) ans+="A";
-	  else ans+="B";
-	}
-      else
-	{
-	  query=ans+"A"+ans+"XA"+ans+"XX"+ans+"XB";
-	  x=press(query);
-	  if(x==0) ans+="B";
-	  else if(x==1) ans+="A";
-	  else ans+="X";
-	}
-    }
-  if(ans[0]!='A')
-    {
-      query=ans+"A";
-      x=press(query);
-      if(x==N) return query;
-    }
-  if(ans[0]!='B')
-    {
-      query=ans+"B";
-      x=press(query);
-      if(x==N) return query;
-    }
-  if(ans[0]!='X')
-    {
-      if(ans[0]=='Y')
-	{
-	  ans+="X";
-	  return ans;
-	}
-      query=ans+"X";
-      x=press(query);
-      if(x==N) return query; 
-    }
-  ans+="Y";
-  return ans;
+  while(p<n) p<<=1;
+  build(0,p-1);
+  rep(i,1,n) solve(-1,A[i]);
+  if(n&1) solve(-1,-1);
+  solve(-1,0);
+  vi C(m+1,-1);
+  C[0]=A[0];
+  answer(C,X,Y);
 }
