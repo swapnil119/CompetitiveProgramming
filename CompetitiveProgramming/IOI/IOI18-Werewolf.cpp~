@@ -36,44 +36,10 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=200005;
-vi v[N];
-int cnt=0;
-int getind(vi &curr)
+int main()
 {
-  assert(!curr.empty());
-  int mx=*max_element(all(curr));
-  int mn=*min_element(all(curr));
-  if(mx==mn) return mx;
-  vi tmp1,tmp2;
-  rep(i,0,sz(curr))
-    {
-      if(i%2==0) tmp1.pb(curr[i]);
-      else tmp2.pb(curr[i]);
-    }
-  //make a switch
-  int ans=++cnt;
-  X[cnt]=getind(tmp1);
-  Y[cnt]=getind(tmp2);
-  return ans;
-}
-void create_circuit(int m,vi A)
-{
-  int n=sz(A);
-  vi C(m+1);
-  vi X(n),Y(n);
-  rep(i,0,n-1)
-    v[A[i]].pb(A[i+1]);
-  v[A[n-1]].pb(0);
-  C[0]=A[0];
-  rep(i,1,m+1)
-    {
-      if(v[i].empty())
-	{
-	  C[i]=0;
-	  continue;
-	}
-      C[i]=getind(v[i]);
-    }
-  answer(C,X,Y);
+  std::ios::sync_with_stdio(false);
+  cin.tie(NULL) ; cout.tie(NULL) ;
+  
+  return 0 ;
 }
