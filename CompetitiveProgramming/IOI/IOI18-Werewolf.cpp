@@ -39,153 +39,154 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #endif
 
 const int N=200005;
-vi v[N];
-bool vis[N];
-void dfs(int u,int l,int r,vi &tmp,int type=0)
+const int L=3*N,LN=20;
+vi ad[N];
+int par[L],val[2][L],val2[L],p[2][LN][L];
+vi v[2][L];//edges for 1st tree and 2nd tree
+int st[2][L],en[2][L],child[2][L],timer[]={1,1};
+int rev[2][L],bit[L];
+vector<ii> queries[L];
+int finda(int u)
 {
-  if(type==0 && u<l) return;
-  if(type==1 && u>r) return;
-  vis[u]=true;
-  tmp.pb(u);
-  for(int v1:v[u])
+  if(par[u]==u) return u;
+  return par[u]=finda(par[u]);
+}
+int cnt;
+void dfs(int u,int type=0,int pa=0)
+{
+  p[type][0][u]=pa;
+  rev[type][timer[type]]=u;
+  st[type][u]=timer[type]++;
+  child[type][u]=1;
+  for(int v1:v[type][u])
+    dfs(v1,type,u),child[type][u]+=child[type][v1];
+  en[type][u]=timer[type];
+}
+void update(int i,int val)
+{
+  while(i<L)
     {
-      if(vis[v1]) continue;
-      dfs(v1,l,r,tmp,type);
+      bit[i]+=val;
+      i+=(i&(-i));
     }
 }
-vi subtask12(int n,vi S,vi E,vi L,vi R)
+int query(int i)
 {
-  int q=sz(S);
-  vi ans(q,0);
-  rep(i,0,q)
+  int ans=0;
+  while(i)
     {
-      int x=S[i],y=E[i],l=L[i],r=R[i];
-      if(x<l || y>r)
-	continue;
-      vi tmp1,tmp2;
-      rep(j,0,n) vis[j]=false;
-      dfs(x,l,r,tmp1);
-      dfs(y,l,r,tmp2,1);
-      sort(all(tmp1)); sort(all(tmp2));
-      bool ok=false;
-      for(int x:tmp1)
-	{
-	  int ind=lower_bound(all(tmp2),x)-tmp2.begin();
-	  if(ind!=sz(tmp2) && tmp2[ind]==x) ok=true;
-	}
-      if(ok) ans[i]=1;
+      ans+=bit[i];
+      i-=(i&(-i));
     }
   return ans;
 }
-vector<ii> seg[4*N];
-vi pre[2][4*N];
-int pos[N],a[N];
-#define lc (pos)+(pos)
-#define rc (lc)|1
-void build(int low,int high,int pos)
+/* to check whether two subtrees intersect, use dsu on tree, for each node, add st[v](of 2nd tree) corr. to each v in u's subtree, and then check if this has any common element by checking st[x],en[x] has any 1 or not*/
+//alternate to check if in two permutation, any two subarrays (l,r) and (L,R) have anything in common, simply make a point (i,b-1(a[i])) for each element and check if there is any point in (l,L) to (r,R), this can be done by offline BIT
+void calcdfs(int u,int type,bool keep,int n,vi &ans)
 {
-  if(low==high)
+  int mx=-1,bigchild=-1;
+  for(int v1:v[type][u])
     {
-      seg[pos].pb(mp(a[low],low));
-      pre[pos].pb(low);
-      return;
+      if(child[type][v1]>mx)
+	mx=child[type][v1],bigchild=v1;
     }
-  int mid=(low+high)>>1;
-  build(low,mid,lc); build(mid+1,high,rc);
-  seg[pos]=seg[lc];
-  for(int x:seg[rc]) seg[pos].pb(x);
-  sort(all(seg[pos]));
-  rep(i,0,2)
-    pre[i][pos].pb(seg[pos][0].se);
-  rep(i,1,sz(seg[pos]))
+  for(int v1:v[type][u])
+    if(v1!=bigchild)
+      calcdfs(v1,type,0,n,ans);
+  if(bigchild!=-1)
+    calcdfs(bigchild,type,1,n,ans);
+  for(int v1:v[type][u])
     {
-      pre[0][pos].pb(min(pre[0][pos].back(),seg[pos][i].se));
-      pre[1][pos].pb(min(pre[1][pos].back(),seg[pos][i].se));
-    }
-}
-int query(int low,int high,int pos,int l,int r,int k,int type=0)
-{
-  if(low>r || high<l) return ((type==0)?N:-1);
-  if(low>=l && high<=r)
-    {
-      int ind=upper_bound(all(seg[pos]),mp(k,N))-seg[pos].begin()-1;
-      if(ind<0 || seg[pos][ind]>k) return N;
-      return pre[type][pos][ind];
-    }
-  int mid=(low+high)>>1;
-  if(!type)
-    return min(query(low,mid,lc,l,r,k),query(mid+1,high,rc,l,r,k));
-  return max(query(low,mid,lc,l,r,k),query(mid+1,high,rc,l,r,k));
-}
-int query2(int low,int high,int pos,int l,int r)
-{
-  if(low>r || high<l) return N;
-  if(low>=l && high<=r)
-    return seg[pos].back().fi;
-  int mid=(low+high)>>1;
-  return max(query2(low,mid,lc,l,r),query2(mid+1,high,rc,l,r));
-}
-vi subtask3(int n,vi S,vi E,vi L,vi R)
-{
-  int q=sz(S);
-  vi ans(q,0);
-  int ind=-1;
-  rep(i,1,n+1) if(sz(v[i])==1) ind=i;
-  if(ind==-1) return ans;
-  a[1]=ind; pos[ind]=1;
-  rep(i,2,n+1)
-    {
-      for(int v1:v[ind])
+      if(v1==bigchild) continue;
+      rep(i,st[type][v1],en[type][v1])
 	{
-	  if(v1==a[i-1]) continue;
-	  ind=v1; break;
+	  int x=rev[type][i];
+	  if(x>=1 && x<=n)
+	    update(st[1-type][x],1);
 	}
-      a[i]=ind;
-      pos[ind]=i;
     }
-  build(1,n,1);
-  rep(i,0,q)
+  if(u>=1 && u<=n) update(st[1-type][u],1);
+  for(auto it:queries[u])
+    {
+      int tmp=query(en[1-type][it.fi]-1)-query(st[1-type][it.fi]-1);
+      if(tmp) ans[it.se]=1;
+    }
+  if(!keep)
+    {
+      rep(i,st[type][u],en[type][u])
+	{
+	  int x=rev[type][i];
+	  if(x>=1 && x<=n)
+	    update(st[1-type][x],-1);
+	}
+    }
+}
+vi solve(int n,vi X,vi Y,vi S,vi E,vi L,vi R)
+{
+  //let U be set of reachable nodes from s which are at >R, we need to represent it as a subtree, similarly for nodes<L
+  cnt=n;
+  rep(i,0,sz(X)) X[i]++,Y[i]++;
+  rep(i,0,sz(X))
+    ad[min(X[i],Y[i])].pb(max(X[i],Y[i]));
+  rep(i,1,n+1) par[i]=i,val[0][i]=n;
+  repv(i,1,n)//add edges in reverse order
+    {
+      for(int v1:ad[i])
+	{
+	  int x=finda(i),y=finda(v1);
+	  if(x==y) continue;
+	  cnt++; par[x]=par[y]=par[cnt]=cnt;//make a new node
+	  v[0][cnt].pb(x); v[0][cnt].pb(y);
+	  val[0][cnt]=i;//index till which edges are added
+	}
+    }
+  int root[2];
+  root[0]=cnt;
+  rep(i,1,n+1) ad[i].clear(),par[i]=i,val[1][i]=1;
+  rep(i,0,sz(X))
+    ad[max(X[i],Y[i])].pb(min(X[i],Y[i]));
+  rep(i,2,n+1)//add edges in reverse order
+    {
+      for(int v1:ad[i])
+	{
+	  int x=finda(i),y=finda(v1);
+	  if(x==y) continue;
+	  cnt++; par[x]=par[y]=par[cnt]=cnt;//make a new node
+	  v[1][cnt].pb(x); v[1][cnt].pb(y);
+	  val[1][cnt]=i;//index till which edges are added
+	}
+    }
+  root[1]=cnt;
+  //make euler tour of both trees
+  rep(i,0,2) dfs(root[i],i,root[i]);
+  rep(k,0,2)
+    rep(i,1,LN)
+    rep(j,1,cnt+1)
+    p[k][i][j]=p[k][i-1][p[k][i-1][j]];
+  vi ans(sz(S),0);
+  rep(i,0,sz(S))
     {
       int x=S[i],y=E[i],l=L[i],r=R[i]; x++,y++,l++,r++;
       if(x<l || y>r)
 	continue;
-      int nx=pos[x],ny=pos[y];
-      if(nx<ny)
+      //find subtree corr. to x s.t. only nodes >=l are reachable
+      int curr1=x;
+      repv(j,0,LN)
 	{
-	  //find 1st element smaller than l in nx,ny
-	  ind=query(1,n,1,nx,ny,l-1);
-	  if(ind>nx && && ind!=N && a[ind-1]>=l && a[ind-1]<=r)
-	    {
-	      //check if max element in ind,ny is <=r
-	      int mx=query2(1,n,1,ind,ny);
-	      if(mx<=r) ans[i]=1;
-	    }
+	  if(val[0][p[0][j][curr1]]>=l)
+	    curr1=p[0][j][curr1];
 	}
-      else
-	{
-	  //find last element smaller than l in nx,ny
-	  ind=query(1,n,1,ny,nx,l-1,1);
-	  if(ind<nx && && ind!=-1 && a[ind+1]>=l && a[ind+1]<=r)
-	    {
-	      //check if max element in ny,ind is <=r
-	      int mx=query2(1,n,1,ny,ind);
-	      if(mx<=r) ans[i]=1;
-	    }
-	}
+      int curr2=y;
+      repv(j,0,LN)
+	if(val[1][p[1][j][curr2]]<=r)
+	  curr2=p[1][j][curr2];
+      //now check if subtrees of curr1 and curr2 intersect
+      queries[curr1].pb(mp(curr2,i));
     }
+  calcdfs(root[0],0,0,n,ans);
   return ans;
 }
 vi check_validity(int n,vi X,vi Y,vi S,vi E,vi L,vi R)
 {
-  int q=sz(S);
-  rep(i,0,sz(x))
-    {
-      v[x[i]].pb(y[i]);
-      v[y[i]].pb(x[i]);
-    }
-  if(n<=3000 && q<=3000)
-    return subtask12(n,S,E,L,R);
-  if(m==n-1)
-    return subtask3(n,S,E,L,R);
-  return S;
+  return solve(n,X,Y,S,E,L,R);
 }
