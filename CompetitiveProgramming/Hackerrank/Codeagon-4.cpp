@@ -2,6 +2,7 @@
 #pragma GCC optimize("Ofast")
 #pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native")
 #pragma GCC optimize("unroll-loops")
+
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -40,76 +41,63 @@ typedef tree<int ,null_type,less<int>,rb_tree_tag,tree_order_statistics_node_upd
 #else
 #define trace(...)
 #endif
-const ll inf=(ll)1e18;
-const int N=7000005;
-int c1,c2,sq2[N];
-map<ll,ll> dp,dp2;
-ll dpa[N],dpb[N];
-map<ll,vector<ll> > store;
-void faltu(ll n)
+
+const int mod=1e9+7;
+const int N=305;
+int add(int x,int y)
 {
-  if(n==1) return;
-  if(store.count(n)) return ;
-  int sq;
-  if(n>=N) sq=sqrt(n);
-  else sq=sq2[n];
-  rep(i,1,sq+1)
-    {
-      if(n%i) continue;
-      store[n].pb(i); faltu(i);
-      if((ll)i*i!=n && i!=1) store[n].pb(n/i),faltu(n/i);
-    }
+  x+=y;
+  if(x>=mod) x-=mod;
+  if(x<0) x+=mod;
+  return x;
 }
-ll fun(ll n)
+int dp[3][N][N][N];
+string a,b,c;
+int fun(int type,int x,int y,int z)
 {
-  if(n==1) return 0;
-  if(n>=N)
+  if(z==sz(c)) return 1;
+  if(x==sz(a) && y==sz(b)) return 0;
+  if(dp[type][x][y][z]!=-1) return dp[type][x][y][z];
+  int ans=0;
+  if(type!=2 && x<sz(a))
     {
-      if(dp.count(n)) return dp[n];
+      if(a[x]==c[z]) ans=add(ans,fun(0,x+1,y,z+1));
+      ans=add(ans,fun(1,x+1,y,z));
     }
-  else if(dpa[n]!=-1) return dpa[n];
-  ll ans=inf;
-  for(ll i:store[n])
-    ans=min(ans,(ll)c1+fun(i)+(n/i-1)*c2);
-  if(n>=N)
-    return dp[n]=ans;
-  else
-    return dpa[n]=ans;
+  if(type!=1 && y<sz(b))
+    {
+      if(b[y]==c[z]) ans=add(ans,fun(0,x,y+1,z+1));
+      ans=add(ans,fun(2,x,y+1,z));
+    }
+  return dp[type][x][y][z]=ans;
 }
-ll fun2(ll n)
+int fun2(int x,int y)
 {
-  ll ans2=fun(n);
-  if(n==1) return 1;
-  if(n>=N)
-    {
-      if(dp2.count(n)) return dp2[n];
-    }
-  else if(dpb[n]!=-1) 
-    return dpb[n];
-  ll ans=0;
-  for(ll i:store[n])
-    {
-      ll tmp=fun(i);
-      if((ll)c1+tmp+(n/i-1)*c2==ans2)
-    ans+=fun2(i);
-    }
-  if(n>=N)
-    return dp2[n]=ans;
-  else
-    return dpb[n]=ans;
+  if(y==sz(c)) return 1;
+  if(x==sz(a)) return 0;
+  if(dp[0][0][x][y]!=-1) return dp[0][0][x][y];
+  int ans=fun2(x+1,y);
+  if(a[x]==c[y]) ans=add(ans,fun2(x+1,y+1));
+  return dp[0][0][x][y]=ans;
+}
+int fun3(int x,int y)
+{
+  if(y==sz(c)) return 1;
+  if(x==sz(b)) return 0;
+  if(dp[0][0][x][y]!=-1) return dp[0][0][x][y];
+  int ans=fun3(x+1,y);
+  if(b[x]==c[y]) ans=add(ans,fun3(x+1,y+1));
+  return dp[0][0][x][y]=ans;
 }
 int main()
 {
-  std::ios::sync_with_stdio(false);
-  cin.tie(NULL) ; cout.tie(NULL) ;
-  memset(dpa,-1,sizeof(dpa));
-  memset(dpb,-1,sizeof(dpb));
-  ll n;
-  cin>>n>>c1>>c2;
-  rep(i,1,N) sq2[i]=sqrt(i);
-  faltu(n);
-  ll ans1=fun(n);
-  ll ans2=fun2(n);
-  cout<<ans1<<" "<<ans2<<endl;
-  return 0 ;
+  memset(dp,-1,sizeof(dp));
+  cin>>a>>b>>c;
+  int ans=fun(0,0,0,0);
+  memset(dp,-1,sizeof(dp));
+  ans=add(ans,-fun2(0,0));
+  memset(dp,-1,sizeof(dp));
+  ans=add(ans,-fun3(0,0));
+  cout<<ans<<endl;
+  return 0; 
 }
