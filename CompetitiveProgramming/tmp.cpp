@@ -5,7 +5,7 @@ using namespace std;
 using namespace __gnu_pbds;
 
 #define ll long long
-#define db long double
+#define db double
 #define ii pair<int,int>
 #define vi vector<int>
 #define fi first
@@ -36,64 +36,46 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-//using alien's trick
-const db inf=(double)6e18;
-const int N=200005,iter=105;
+const double inf=(double)6e18;
+const int N=200005;
 ll c[N];
-db pre[N],pre2[N],dp[N],pre3[N];
-#define ddi pair<pair<db,db>,int> 
-int st,en;
-ddi arr[N];
-void addline(db m,db c,int ind)
+db pre[N],pre2[N],dp[2][N],pre3[N];
+db cost(int i,int j)
 {
-  arr[en]=mp(mp(m,c),ind);
-  while(st+1<en && (arr[en-1].fi.se-arr[en-2].fi.se)*(arr[en].fi.fi-arr[en-1].fi.fi)<=(arr[en-1].fi.se-arr[en].fi.se)*(arr[en-2].fi.fi-arr[en-1].fi.fi))
-    arr[en-1]=arr[en],en--;
-  en++;
+  return pre2[j]-pre2[i-1]-pre[i-1]*(pre3[j]-pre3[i-1]);
 }
-pair<db,int> query(db x)
+void fun(int l,int r,int bestl,int bestr,int curr)
 {
-  while(st+1<en && arr[st+1].fi.se-arr[st].fi.se>=x*(arr[st].fi.fi-arr[st+1].fi.fi)) st++;
-  return mp(arr[st].fi.fi*x+arr[st].fi.se,arr[st].se);
-}
-int n,cnt[N];
-int fun(db mid)
-{
-  //b->pre[i]*pre3[i]-pre2[i]+dp[i]
-  //m->-pre[i]
-  st=en=0;
-  addline(0,0,0);
-  rep(i,1,n+1)
+  if(l>r) return;
+  int mid=(l+r)>>1,i,best=0;
+  dp[curr][mid]=inf;
+  rep(i,bestl,min(bestr,mid-1)+1)
     {
-      auto it=query(pre3[i]);
-      cnt[i]=cnt[it.se]+1;
-      dp[i]=-it.fi+pre2[i]+mid;
-      addline(pre[i],-dp[i]-(pre[i]*pre3[i])+pre2[i],i);
+      if(dp[1-curr][i]+cost(i+1,mid)<=dp[curr][mid])
+	{
+	  dp[curr][mid]=dp[1-curr][i]+cost(i+1,mid);;
+	  best=i;
+	}
     }
-  return cnt[n];
+  fun(l,mid-1,bestl,best,curr);
+  fun(mid+1,r,best,bestr,curr);
 }
 int main()
 {
-  int k,i,j;
-  cin>>n>>k;
+  int n,k,i,j;
+  scanf("%d %d",&n, &k);
   k=min(k,n);
   rep(i,1,n+1)
     {
-      cin>>c[i];
+      scanf("%lld",&c[i]);
       pre[i]=pre[i-1]+c[i];
-      pre3[i]=pre3[i-1]+1.0/(double)c[i];
+      pre3[i]=pre3[i-1]+1.0/(db)c[i];
     }
   rep(i,1,n+1)
     pre2[i]=pre2[i-1]+pre[i]/(db)c[i];
-  db low=0.0,high=1e18;
-  rep(i,0,iter)
-    {
-      db mid=(low+high)/2.0;
-      if(fun(mid)>k) low=mid;
-      else high=mid;
-    }
-  int tmp=fun(high);
-  cout<<setprecision(10)<<fixed;
-  cout<<dp[n]-high*tmp<<endl;
+  rep(i,1,n+1) dp[1][i]=cost(1,i);
+  rep(i,2,k+1)
+    fun(1,n,1,n,(i&1));
+  printf("%.10lf\n",dp[(k&1)][n]);
   return 0;
 }
