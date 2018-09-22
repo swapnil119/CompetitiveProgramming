@@ -36,10 +36,37 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
+//denote p[i][j] as prob. that a[i]>a[j]
+const int N=1005;
+db p[N][N];
+int a[N];
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  
+  int n,m;
+  cin>>n>>m;
+  rep(i,0,n) cin>>a[i];
+  rep(i,0,n) rep(j,i+1,n) p[i][j]=(a[i]>a[j]);
+  while(m--)
+    {
+      int x,y;
+      cin>>x>>y; x--; y--;
+      if(x>y) swap(x,y);
+      rep(i,0,x) p[i][x]=p[i][y]=0.5*p[i][x]+0.5*p[i][y];
+      rep(i,y+1,n) p[x][i]=p[y][i]=0.5*p[x][i]+0.5*p[y][i];
+      rep(i,x+1,y)
+	{
+	  db tmp=p[x][i];
+	  p[x][i]=0.5*p[x][i]+0.5*(1.0-p[i][y]);
+	  p[i][y]=0.5*(1.0-tmp)+0.5*p[i][y];
+	}
+      p[x][y]=0.5;
+    }
+  db ans=0.0;
+  rep(i,0,n)
+    rep(j,i+1,n) ans+=p[i][j];
+  cout<<setprecision(10)<<fixed;
+  cout<<ans<<endl;
   return 0 ;
 }
