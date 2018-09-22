@@ -36,26 +36,59 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=205,N1=505,mod=1e9+7;
-int dp[N][N1][N1];
+const int N=205,K=1005,mod=1e9+7;
+int dp[N][N][K];//till ith index, j elements are left to map, and k is cost
+int a[N];
+int add(int x,int y)
+{
+  x+=y;
+  if(x>=mod) x-=mod;
+  if(x<0) x+=mod;
+  return x;
+}
+int mult(int x,int y)
+{
+  ll tmp=(ll)x*y;
+  if(tmp>=mod) tmp%=mod;
+  return tmp;
+}
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
   int n,k;
   cin>>n>>k;
-  rep(i,1,n+1)
+  rep(i,1,n+1) cin>>a[i];
+  sort(a+1,a+n+1);
+  dp[1][0][0]=1;
+  dp[1][1][0]=1;
+  rep(i,2,n+1)
     {
-      int x;
-      cin>>x;
-      rep(j,1,N1)
-	rep(k,j,N1)
+      int diff=a[i]-a[i-1];
+      rep(j,0,i)//these elements are left to map
 	{
-	  if(x<j) dp[i][x][k]=add(dp[i][x][k],dp[i-1][j][k]);
-	  else if(x<=k) dp[i][j][k]=add(dp[i][j][k],dp[i-1][j][k]);
-	  else dp[i][j][x]=add(dp[i][j][x],dp[i-1][j][k]);
+	  rep(l,0,k+1)//this cost is done
+	    {
+	      int nxt=l+diff*j;
+	      if(nxt>k) continue;
+	      //map it with 1 element
+	      if(j)
+		{
+		  //this is end of this group
+		  dp[i][j-1][nxt]=add(dp[i][j-1][nxt],mult(dp[i-1][j][l],j));
+		  //this group will go ahead
+		  dp[i][j][nxt]=add(dp[i][j][nxt],mult(dp[i-1][j][l],j));
+		}
+	      //make new group
+	      //end it here
+	      dp[i][j][nxt]=add(dp[i][j][nxt],dp[i-1][j][l]);
+	      //this will go ahead
+	      dp[i][j+1][nxt]=add(dp[i][j+1][nxt],dp[i-1][j][l]);
+	    }
 	}
-      dp[i][x][x]=add(dp[i][x][x],1);
     }
+  int ans=0;
+  rep(i,0,k+1) ans=add(ans,dp[n][0][i]);
+  cout<<ans<<endl;
   return 0 ;
 }
