@@ -36,10 +36,51 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
+const int N=2000005;
+int pre[N],a[N],cnt[2*N];
+bool mark[2*N],m1[2*N],m2[2*N];
+vi v1,v2;
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  
+  int t;
+  cin>>t;
+  while(t--)
+    {
+      v1.clear(); v2.clear();
+      int n;
+      cin>>n;
+      rep(i,1,n+1) cin>>a[i],pre[i]=pre[i-1]+a[i];
+      rep(i,1,n+1) mark[pre[i]]=true;
+      rep(i,1,n+1) v1.pb(pre[i]),v2.pb(pre[i]);
+      rep(i,1,n)
+	{
+	  if(a[i]==1)
+	    {
+	      vi tmp;
+	      for(int x:v1)
+		{
+		  m1[x]=true;
+		  if(x-1>0 && !m1[x-1]) mark[x-1]=true,tmp.pb(x-1);
+		}
+	      swap(v1,tmp);
+	    }
+	  else
+	    {
+	      vi tmp;
+	      for(int x:v2)
+		{
+		  m2[x]=true;
+		  if(x-2>0 && !m2[x-2]) mark[x-2]=true,tmp.pb(x-2);
+		}
+	      swap(tmp,v2);
+	    }
+	}
+      int ans=0;
+      rep(i,1,2*n+1) ans+=mark[i];
+      cout<<ans<<endl;
+      rep(i,1,2*n+1) mark[i]=m1[i]=m2[i]=false;
+    }
   return 0 ;
 }
