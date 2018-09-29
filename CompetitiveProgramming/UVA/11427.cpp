@@ -37,6 +37,7 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #define trace(...)
 #endif
 const int N=105;
+const db EPS=1e-9;
 db dp[N][N];//games played, games won
 int main()
 {
@@ -57,9 +58,9 @@ int main()
 	      db won=j;
 	      if((won/(db)(i-1))>p) continue;
 	      //win this game
-	      dp[i][j+1]=dp[i-1][j]*p;
+	      dp[i][j+1]+=dp[i-1][j]*p;
 	      //lose this game
-	      dp[i][j]=dp[i-1][j]*(1.0-p);
+	      dp[i][j]+=dp[i-1][j]*(1.0-p);
 	    }
 	}
       db winday=0.0;
@@ -72,7 +73,7 @@ int main()
 	    }
 	}
       db loseday=1.0-winday;
-      db ret=1.0/loseday;
+      db ret=1.0/loseday; ret+=EPS;
       int ans=ret;
       cout<<"Case #"<<t<<": "<<ans<<endl;
     }
