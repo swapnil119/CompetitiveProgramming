@@ -36,10 +36,55 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
+const int mod=1e9+7,N=2005;
+int add(int x,int y)
+{
+  x+=y;
+  if(x>=mod) x-=mod;
+  if(x<0) x+=mod;
+  return x;
+}
+int mult(int x,int y)
+{
+  ll tmp=(ll)x*y;
+  if(tmp>=mod) tmp%=mod;
+  return tmp;
+}
+int dp[N][N];//elements done from i to n, and no. of elements before i+1
+int n,pre[N][N];
+bool a[N];
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  
+  cin>>n;
+  rep(i,1,n)
+    {
+      int x;
+      cin>>x;
+      a[i]=x;
+    }
+  dp[n][0]=pre[n][0]=1;
+  rep(j,1,n+1) pre[n][j]=pre[n][j-1]+dp[n][j];
+  repv(i,1,n)
+    {
+      rep(j,0,n-i+1)
+	{
+	  if(a[i])//this comes before i+1
+	    {
+	      if(!j) dp[i][j]=pre[i+1][n];
+	      else dp[i][j]=add(pre[i+1][n],-pre[i+1][j-1]);
+	    }
+	  else
+	    {
+	      if(j) dp[i][j]=pre[i+1][j-1];
+	    }
+	}
+      pre[i][0]=dp[i][0];
+      rep(j,1,n+1) pre[i][j]=add(pre[i][j-1],dp[i][j]);
+    }
+  int ans=0;
+  rep(i,0,n) ans=add(ans,dp[1][i]);
+  cout<<ans<<endl;
   return 0 ;
 }
