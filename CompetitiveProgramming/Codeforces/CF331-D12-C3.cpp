@@ -36,32 +36,47 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
-const int N=1000005;
-int dp[N];
-set<int> s;
+#define pli pair<ll,ll>
+map<pli,pli> dp;
+pli fun(ll n,ll mx)
+{
+  if(n==0) return mp(0,0);
+  if(n<10)
+    {
+      pli ans=mp(1,0);
+      if(mx>n) ans.se=n-mx;
+      return ans;
+    }
+  ll tn=n;
+  if(dp.count(mp(n,mx))) return dp[mp(n,mx)];
+  ll mod=1;
+  while(mod<=n/10) mod*=10;
+  pli ans=mp(0,0);
+  while(true)
+    {
+      ll nmx=mx;
+      ll d=n/mod;
+      nmx=max(nmx,d);
+      pli tmp=fun(n%mod,nmx);
+      ans.fi+=tmp.fi;
+      if(tmp.se<0)
+	n=n-(n%mod)+tmp.se;
+      else if(tmp.se==0)
+	{
+	  n=n-(n%mod)-nmx;
+	  if(nmx) ans.fi++;
+	}
+      if(d==0) break;
+    }
+  ans.se=n;
+  return dp[mp(tn,mx)]=ans;
+}
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
-  int n=N-1;
-  dp[0]=0;
-  rep(i,1,n+1)
-    {
-      int ans=n+1;
-      set<int> x;
-      int tmp=i;
-      s.clear();
-      while(tmp)
-	{
-	  if(tmp%10) s.insert(tmp%10);
-	  tmp/=10;
-	}
-      for(auto it:s)
-	ans=min(ans,1+dp[i-it]);
-      dp[i]=ans;
-      assert(dp[i]>=dp[i-1]);
-      assert(dp[i]==dp[i-*s.rbegin()]+1);
-      //trace(i,dp[i]);
-    }
+  ll n;
+  cin>>n;
+  cout<<fun(n,0).fi<<endl;
   return 0 ;
 }
