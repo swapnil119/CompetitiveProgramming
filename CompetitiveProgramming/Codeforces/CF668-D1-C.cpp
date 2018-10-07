@@ -36,10 +36,23 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
+//p1(i)+p2(i)=ai+bi and p1(1)p2(1)=a1
+const int N=100005;
+db mx[N],mn[N],pre1[N],pre2[N];
+db a[N],b[N];
 int main()
 {
   std::ios::sync_with_stdio(false);
   cin.tie(NULL) ; cout.tie(NULL) ;
+  int n;
+  cin>>n;
+  rep(i,1,n+1) cin>>mx[i];
+  rep(i,1,n+1) cin>>mn[i];
+  db tmp=mx[1]+mn[1];
+  db D=tmp*tmp-4.0*mx[1];
+  D=sqrt(D);
+  db val=(tmp+D)/2.0;
+  a[1]=pre1[1]=val; b[1]=pre2[1]=mx[1]+mn[1]-val;
   
   return 0 ;
 }
