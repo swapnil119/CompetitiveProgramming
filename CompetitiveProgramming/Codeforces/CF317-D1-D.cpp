@@ -37,33 +37,8 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #define trace(...)
 #endif
 map<int,vi> m;
-map<ii,int> dp;
 map<int,bool> done;
-int fun(int mask,int n)
-{
-  if(__builtin_popcount(mask)==0)
-    return 0;
-  if(dp.count(mp(mask,n))) return dp[mp(mask,n)];
-  set<int> s;
-  rep(i,0,n)
-    {
-      if(!(mask&(1<<i))) continue;
-      int nxt=mask;
-      for(int j=i;j<n;j+=(i+1))
-	{
-	  if(mask&(1<<j))
-	    nxt^=(1<<j);
-	}
-      s.insert(fun(nxt,n));
-    }
-  int curr=0;
-  while(true)
-    {
-      if(!s.count(curr)) return dp[mp(mask,n)]=curr;
-      curr++;
-    }
-  assert(false);
-}
+int nim[30] = {0, 1, 2, 1, 4, 3, 2, 1, 5, 6, 2, 1, 8, 7, 5, 9, 8, 7, 3, 4, 7, 4, 2, 1, 10, 9, 3, 6, 11, 12};
 int main()
 {
   std::ios::sync_with_stdio(false);
@@ -76,14 +51,17 @@ int main()
     {
       if(done.count(i)) continue;
       for(int pw=i;pw<=n;pw*=i)
-	m[i].pb(pw),cnt++,done[pw];
+	{
+	  m[i].pb(pw),cnt++,done[pw];
+	  if(pw>n/i) break;
+	}
     }
   int rem=n-cnt;
   int grundy=0;
   for(auto it:m)
     {
       int sz=sz(it.se);
-      grundy^=fun((1<<sz)-1,sz);
+      grundy^=nim[sz];
     }
   if(rem&1) grundy^=1;
   if(grundy) cout<<"Vasya"<<endl;
