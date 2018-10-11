@@ -57,6 +57,10 @@ int mulmod(int x,int y,int mod)
       k=kk;}if(k!=1)return false;
   }return true;
 }
+/*dp[n] represents min. number that can be made with euler totient = n.
+Now let n = p1^i1, p2^i2, ...., pk^ik,
+phi will contain (p1-1)*(p2-1)*...*(pk-1) in its factorization
+so check divisors of phi and if divisor + 1 is prime, try using powers of that prime in n, and call fun(newphi)*primepower*/
 const int inf=(int)(2e9)+2;
 unordered_map<int,int> dp;
 int fun(int phi)
