@@ -36,6 +36,17 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #else
 #define trace(...)
 #endif
+/*answer for a particular element with index i, Let elements smaller than it be x, and larger than it be y
+answer is C(x,x)(C(y,x)+C(y,x-1)+..+C(y,0)) + C(x,x-1) (C(y,x-1)+... + C(y,0)) + ... + C(x,0) C(y,0)
+this can be reduced to C(x,x) C(y,x) + C(x,x-1) C(y,x-1) +..... +C(x,0)C(y,0)
++ C(x,x) C(y,x-1) + C(x,x-1) C(y,x-2) +.......... + C(x,1) C(y,0)
++ ....
++ C(x,x) C(y,0)
+which is equal to
+summation i=0 to x summation j = 0 to x  { C(x,x-j) * C(y,i-j) } 
+= sumi sumj { C(x,j) C(n-1-x,i-j) }
+= sumi C(n-1,i) [USING PASCAL IDENTITY]
+*/
 const int N=100005,mod=1e9+7;
 int f[N],inv[N];
 int add(int x,int y)
@@ -68,6 +79,7 @@ int ncr(int x,int y)
   return mult(f[x],mult(inv[y],inv[x-y]));
 }
 int a[N];
+map<int,int> m;
 int main()
 {
   std::ios::sync_with_stdio(false);
@@ -75,30 +87,28 @@ int main()
   f[0]=inv[0]=1;
   rep(i,1,N) f[i]=mult(f[i-1],i);
   inv[N-1]=pow1(f[N-1],mod-2);
-  repv(i,1,N-1) inv[i]=mult(inv[i+1],i+1);
+  repv(i,1,N-1)
+    {
+      inv[i]=mult(inv[i+1],i+1);
+      assert(mult(inv[i],f[i])==1);
+    }
   int n,q;
   cin>>n>>q;
   rep(i,1,n+1)
     cin>>a[i];
   sort(a+1,a+n+1);
+  int sum=0;
+  rep(i,1,n+1)
+    {
+      int tmp=ncr(n-1,i-1);
+      sum=add(sum,tmp);
+      m[a[i]]=sum;
+    }
   while(q--)
     {
       int val;
       cin>>val;
-      if(a[1]>=val)
-	{
-	  cout<<1<<endl;
-	  continue;
-	}
-      int x=lower_bound(a+1,a+n+1,val)-a-1;
-      int ans=0;
-      rep(i,0,n)
-	{
-	  int imp=(i+1)/2;
-	  ans=add(ans,mult(ncr(x,imp),ncr(n-1-imp,i-imp)));
-	  trace(i,ans,x,imp);
-	}
-      cout<<ans<<endl;
+      cout<<m[val]<<endl;
     }
   return 0 ;
 }
