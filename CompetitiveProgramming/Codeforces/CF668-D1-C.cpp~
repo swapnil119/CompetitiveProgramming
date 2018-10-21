@@ -53,9 +53,6 @@ int main()
   D=sqrt(D);
   db val=(tmp+D)/2.0;
   a[1]=pre1[1]=val; b[1]=pre2[1]=mx[1]+mn[1]-val;
-  rep(i,2,n+1)
-    {
-      
-    }
+  
   return 0 ;
 }
