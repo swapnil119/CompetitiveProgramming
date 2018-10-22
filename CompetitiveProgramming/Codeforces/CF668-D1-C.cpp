@@ -38,8 +38,16 @@ void __f(const char* names, Arg1&& arg1, Args&&... args){
 #endif
 //p1(i)+p2(i)=ai+bi and p1(1)p2(1)=a1
 const int N=100005;
-db mx[N],mn[N],pre1[N],pre2[N];
+const db EPS=1e-9;
+db mx[N],mn[N];
 db a[N],b[N];
+db fun(db b,db c)
+{
+  db dis=b*b-c*4.0;
+  if(abs(dis)<EPS) dis=0.0;
+  dis=sqrt(dis);
+  return (dis-b)/2.0;
+}
 int main()
 {
   std::ios::sync_with_stdio(false);
@@ -48,14 +56,17 @@ int main()
   cin>>n;
   rep(i,1,n+1) cin>>mx[i];
   rep(i,1,n+1) cin>>mn[i];
-  db tmp=mx[1]+mn[1];
-  db D=tmp*tmp-4.0*mx[1];
-  D=sqrt(D);
-  db val=(tmp+D)/2.0;
-  a[1]=pre1[1]=val; b[1]=pre2[1]=mx[1]+mn[1]-val;
+  a[1]=fun(-mx[1]-mn[1],mx[1]);
+  b[1]=mx[1]+mn[1]-a[1];
   rep(i,2,n+1)
     {
-      
+      mx[i]+=mx[i-1]; mn[i]+=mn[i-1];
+      a[i]=fun(-mx[i]-mn[i],mx[i]);
+      b[i]=mx[i]+mn[i]-a[i];
     }
+  repv(i,2,n+1) a[i]-=a[i-1],b[i]-=b[i-1];
+  cout<<setprecision(10)<<fixed;
+  rep(i,1,n+1) cout<<a[i]<<" "; cout<<endl;
+  rep(i,1,n+1) cout<<b[i]<<" "; cout<<endl;
   return 0 ;
 }
